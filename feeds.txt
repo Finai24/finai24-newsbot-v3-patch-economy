@@ -1,0 +1,4 @@
+https://news.google.com/rss/search?q=finanza+quando:1d&hl=it&gl=IT&ceid=IT:it
+https://www.reutersagency.com/feed/?best-topics=business-finance&post_type=best
+https://www.ansa.it/sito/ansait_rss.xml
+https://finance.yahoo.com/news/rssindex
