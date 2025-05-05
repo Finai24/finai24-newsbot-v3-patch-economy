@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 STRAPI_API_TOKEN = os.getenv("STRAPI_API_TOKEN")
+MODELLO_OPENAI = os.getenv("MODELLO_OPENAI", "gpt-3.5-turbo")
 STRAPI_API_URL = "https://finai24-cms.onrender.com/api/articoli"
 ARCHIVIO_FILE = "pubblicati.json"
 FEED_LIST = "feeds.txt"
@@ -41,27 +42,12 @@ def estrai_feed(feed_url):
 def gpt_chat(prompt, ruolo):
     try:
         return openai.ChatCompletion.create(
-            model="gpt-4-turbo",
-            messages=[{"role": "system", "content": ruolo}, {"role": "user", "content": prompt}],
-            temperature=0.5
-        ).choices[0].message.content.strip()
-    except openai.error.InvalidRequestError as e:
-        if "model" in str(e):
-            return gpt_chat_fallback(prompt, ruolo)
-        raise
-    except openai.error.RateLimitError:
-        log_errore("Quota superata - GPT-4")
-        raise
-
-def gpt_chat_fallback(prompt, ruolo):
-    try:
-        return openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            model=MODELLO_OPENAI,
             messages=[{"role": "system", "content": ruolo}, {"role": "user", "content": prompt}],
             temperature=0.5
         ).choices[0].message.content.strip()
     except Exception as e:
-        log_errore(f"Errore anche con GPT-3.5: {e}")
+        log_errore(f"Errore GPT: {e}")
         raise
 
 def classifica_categoria(titolo, descrizione):
@@ -102,7 +88,7 @@ def pubblica_articolo(titolo, contenuto, fonte_url, categoria):
     return response.status_code, response.text
 
 def main():
-    print("🚀 Avvio FinAI24 Newsbot v3 - PATCH ECONOMY")
+    print(f"🚀 Avvio FinAI24 Newsbot - modello attivo: {MODELLO_OPENAI}")
     storico = pulizia_storico(carica_storico())
     with open(FEED_LIST, "r") as f:
         feed_urls = [line.strip() for line in f if line.strip()]
